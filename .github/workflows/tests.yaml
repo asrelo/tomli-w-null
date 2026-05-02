@@ -3,7 +3,7 @@ name: Tests
 on:
   push:
     branches: [ master ]
-    tags: [ 'v_null_[0-9]+.[0-9]+.[0-9]+*' ]
+    tags: [ 'v_null_*' ]
   pull_request:
     branches: [ master ]
 
