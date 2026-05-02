@@ -128,6 +128,8 @@ def gen_table_chunks(
 
 
 def format_literal(obj: object, ctx: Context, *, nest_level: int = 0) -> str:
+    if obj is None:
+        return "null"
     if isinstance(obj, bool):
         return "true" if obj else "false"
     if isinstance(obj, (int, float, date, datetime)):

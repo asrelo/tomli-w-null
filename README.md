@@ -3,7 +3,7 @@
 
 # tomli-w-null
 
-> A lil' TOML writer
+> A lil' TOML writer with support for non-standard `null` values (fork of `tomli-w`)
 
 **Table of Contents** *generated with [mdformat-toc](https://github.com/hukkin/mdformat-toc)*
 
@@ -15,6 +15,7 @@
   - [Write to string](#write-to-string)
   - [Write to file](#write-to-file)
   - [Specify TOML version](#specify-toml-version)
+  - [Write data with `null` values](#write-data-with-null-values)
 - [FAQ](#faq)
   - [Does `tomli-w-null` sort the document?](#does-tomli-w-null-sort-the-document)
   - [Does `tomli-w-null` support writing documents with comments?](#does-tomli-w-null-support-writing-documents-with-comments)
@@ -28,9 +29,10 @@
 ## Intro<a name="intro"></a>
 
 `tomli-w-null` is a Python library for writing [TOML](https://toml.io),
-based on [`tomli-w`](https://github/hukkin/tomli-w). All features of `tomli-w` are preserved.
-It is a write-only counterpart to [tomli-null](https://github.com/asrelo/tomli-null),
-which is a read-only TOML parser.
+based on [`tomli-w`](https://github/hukkin/tomli-w). It extends the writer with support
+for the `null` value, mapping it from Python's `None`. All other features of `tomli-w`
+are preserved. It is a write-only counterpart
+to [tomli-null](https://github.com/asrelo/tomli-null), which is a read-only TOML parser.
 
 `tomli-w-null` can produce TOML code based on TOML [v1.0.0](https://toml.io/en/v1.0.0) (default)
 or [v1.1.0](https://toml.io/en/v1.1.0). Since TOML 1.1.0 is fully backwards compatible
@@ -86,6 +88,22 @@ binary = "\x1a\e\x1c\x1d"
 """
 assert tomli_w_null.dumps(doc, toml_version="1.1.0") == expected_toml
 ```
+
+### Write data with `null` values<a name="write-data-with-null-values"></a>
+
+```python
+import tomli_null
+
+doc = {"value": None, "items": [1, None, 3]}
+expected_toml = """\
+value = null
+items = [1, null, 3]
+"""
+assert tomli_w_null.dumps(doc) == expected_toml
+```
+
+Python's `None` is mapped to the `null` keyword (always produced lowercase,
+just like `true` / `false` in standard TOML).
 
 ## FAQ<a name="faq"></a>
 
