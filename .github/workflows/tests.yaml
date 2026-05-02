@@ -6,6 +6,13 @@ on:
     tags: [ 'v_null_*' ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      use_testpypi:
+        description: Upload to TestPyPI instead of PyPI
+        required: false
+        type: boolean
+        default: true
 
 jobs:
 
@@ -60,26 +67,58 @@ jobs:
     steps:
       - run: echo "Great success!"
 
-#  pypi-publish:
-#    # Only publish if all other jobs succeed
-#    needs: [ allgood ]
-#    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v4
-#    - uses: actions/setup-python@v5
-#      with:
-#        python-version: '3.x'
-#    - name: Install build and publish tools
-#      run: |
-#        pip install build twine
-#    - name: Build and check
-#      run: |
-#        rm -rf dist/ && python -m build
-#        twine check --strict dist/*
-#    - name: Publish
-#      run: |
-#        twine upload dist/*
-#      env:
-#        TWINE_USERNAME: __token__
-#        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+  pypi-publish:
+    # Only publish if all other jobs succeed
+    needs: [ allgood ]
+    if: |
+      (github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')) ||
+      (github.event_name == 'workflow_dispatch' && !inputs.use_testpypi)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+    - uses: actions/download-artifact@v7
+      with:
+        path: dist
+        pattern: artifact-*
+        merge-multiple: true
+    - name: Install build and publish tools
+      run: |
+        pip install build twine
+    - name: Build and check
+      run: |
+        rm -rf dist/ && python -m build
+        twine check --strict dist/*
+    - name: Publish
+      run: |
+        twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+  test-pypi-publish:
+    # Only publish if all other jobs succeed
+    needs: [ allgood ]
+    if: |
+      github.event_name == 'workflow_dispatch' && inputs.use_testpypi
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+    - name: Install build and publish tools
+      run: |
+        pip install build twine
+    - name: Build and check
+      run: |
+        rm -rf dist/ && python -m build
+        twine check --strict dist/*
+    - name: Publish
+      run: |
+        twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}

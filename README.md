@@ -1,6 +1,6 @@
 [![Build Status](https://github.com/asrelo/tomli-w-null/actions/workflows/tests.yaml/badge.svg?branch=master)](https://github.com/asrelo/tomli-w-null/actions?query=workflow%3ATests+branch%3Amaster+event%3Apush)
 
-<!-- [![PyPI version](https://img.shields.io/pypi/v/tomli-w-null)](https://pypi.org/project/tomli-w-null) -->
+[![PyPI version](https://img.shields.io/pypi/v/tomli-w-null)](https://pypi.org/project/tomli-w-null)
 
 # tomli-w-null
 
