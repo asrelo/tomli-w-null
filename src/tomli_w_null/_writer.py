@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2021 Taneli Hukkinen
+# SPDX-FileCopyrightText: 2026 Vyacheslav Syropyatov
 
 from collections.abc import Generator, Mapping
 from datetime import date, datetime, time
@@ -206,7 +207,11 @@ def format_string(s: str, *, allow_multiline: bool) -> str:
                 else:
                     result += COMPACT_ESCAPES[char]
             else:
-                result += "\\u" + hex(ord(char))[2:].rjust(4, "0")
+                char_ord_hex = hex(ord(char))[2:]
+                if len(char_ord_hex) > 4:
+                    result += "\\U" + char_ord_hex.rjust(8, "0")
+                else:
+                    result += "\\u" + char_ord_hex.rjust(4, "0")
             seq_start = pos + 1
         pos += 1
 

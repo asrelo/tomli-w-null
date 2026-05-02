@@ -3,4 +3,5 @@ nl_end = """value\n"""
 
 lit_nl_end = '''value\n'''
 lit_nl_mid = 'val\nue'
-lit_nl_uni = 'val\ue'
+lit_nl_uni_1 = 'val\ue'
+lit_nl_uni_2 = 'val\Ue'
