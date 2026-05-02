@@ -1,14 +1,13 @@
-from __future__ import annotations
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2021 Taneli Hukkinen
 
-from collections.abc import Mapping
+from collections.abc import Generator, Mapping
 from datetime import date, datetime, time
 from types import MappingProxyType
+from typing import IO, TYPE_CHECKING, Any, Final, Union
 
-TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Generator
     from decimal import Decimal
-    from typing import IO, Any, Final
 
 ASCII_CTRL = frozenset(chr(i) for i in range(32)) | frozenset(chr(127))
 ILLEGAL_BASIC_STR_CHARS = frozenset('"\\') | ASCII_CTRL - frozenset("\t")
@@ -21,11 +20,11 @@ MAX_LINE_LENGTH = 100
 COMPACT_ESCAPES = MappingProxyType(
     {
         "\u0008": "\\b",  # backspace
-        "\u000A": "\\n",  # linefeed
-        "\u000C": "\\f",  # form feed
-        "\u000D": "\\r",  # carriage return
+        "\u000a": "\\n",  # linefeed
+        "\u000c": "\\f",  # form feed
+        "\u000d": "\\r",  # carriage return
         "\u0022": '\\"',  # quote
-        "\u005C": "\\\\",  # backslash
+        "\u005c": "\\\\",  # backslash
     }
 )
 
@@ -41,7 +40,7 @@ class Context:
 
 
 def dump(
-    obj: Mapping[str, Any],
+    obj: Mapping[str, "Any"],
     fp: IO[bytes],
     /,
     *,
@@ -123,7 +122,7 @@ def format_literal(obj: object, ctx: Context, *, nest_level: int = 0) -> str:
     )
 
 
-def format_decimal(obj: Decimal) -> str:
+def format_decimal(obj: "Decimal") -> str:
     if obj.is_nan():
         return "nan"
     if obj.is_infinite():
@@ -153,7 +152,7 @@ def format_inline_table(obj: Mapping, ctx: Context) -> str:
     return rendered
 
 
-def format_inline_array(obj: tuple | list, ctx: Context, nest_level: int) -> str:
+def format_inline_array(obj: Union[tuple, list], ctx: Context, nest_level: int) -> str:
     if not obj:
         return "[]"
     item_indent = ctx.indent_str * (1 + nest_level)

@@ -12,7 +12,7 @@ import toml
 import tomli
 import tomlkit
 
-import tomli_w
+import tomli_w_null
 
 test_data_file = Path(__file__).parent / "data.toml"
 test_data = tomli.loads(test_data_file.read_bytes().decode())
@@ -55,7 +55,7 @@ def run(run_count: int) -> None:
     # fmt: off
     baseline = benchmark("pytomlpp", run_count, lambda: pytomlpp.dumps(test_data), col_width)  # noqa: E501
     # benchmark("rtoml", run_count, lambda: rtoml.dumps(test_data), col_width, compare_to=baseline)  # noqa: E501
-    benchmark("tomli", run_count, lambda: tomli_w.dumps(test_data), col_width, compare_to=baseline)  # noqa: E501
+    benchmark("tomli_w_null", run_count, lambda: tomli_w_null.dumps(test_data), col_width, compare_to=baseline)  # noqa: E501
     benchmark("toml", run_count, lambda: toml.dumps(test_data), col_width, compare_to=baseline)  # noqa: E501
     benchmark("tomlkit", run_count, lambda: tomlkit.dumps(tomlkit_test_data), col_width, compare_to=baseline)  # noqa: E501
     benchmark("qtoml", run_count, lambda: qtoml.dumps(test_data), col_width, compare_to=baseline)  # noqa: E501

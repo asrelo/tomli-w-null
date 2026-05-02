@@ -1,8 +1,7 @@
-[![Build Status](https://github.com/hukkin/tomli-w/actions/workflows/tests.yaml/badge.svg?branch=master)](https://github.com/hukkin/tomli-w/actions?query=workflow%3ATests+branch%3Amaster+event%3Apush)
-[![codecov.io](https://codecov.io/gh/hukkin/tomli-w/branch/master/graph/badge.svg)](https://codecov.io/gh/hukkin/tomli-w)
-[![PyPI version](https://img.shields.io/pypi/v/tomli-w)](https://pypi.org/project/tomli-w)
+[![Build Status](https://github.com/asrelo/tomli-w-null/actions/workflows/tests.yaml/badge.svg?branch=master)](https://github.com/asrelo/tomli-w/actions?query=workflow%3ATests+branch%3Amaster+event%3Apush)
+[![PyPI version](https://img.shields.io/pypi/v/tomli-w-null)](https://pypi.org/project/tomli-w-null)
 
-# Tomli-W
+# tomli-w-null
 
 > A lil' TOML writer
 
@@ -16,25 +15,28 @@
   - [Write to string](#write-to-string)
   - [Write to file](#write-to-file)
 - [FAQ](#faq)
-  - [Does Tomli-W sort the document?](#does-tomli-w-sort-the-document)
-  - [Does Tomli-W support writing documents with comments?](#does-tomli-w-support-writing-documents-with-comments)
+  - [Does `tomli-w-null` sort the document?](#does-tomli-w-null-sort-the-document)
+  - [Does `tomli-w-null` support writing documents with comments?](#does-tomli-w-null-support-writing-documents-with-comments)
   - [Can I customize insignificant whitespace?](#can-i-customize-insignificant-whitespace)
-  - [Why does Tomli-W not write a multi-line string if the string value contains newlines?](#why-does-tomli-w-not-write-a-multi-line-string-if-the-string-value-contains-newlines)
-  - [Is Tomli-W output guaranteed to be valid TOML?](#is-tomli-w-output-guaranteed-to-be-valid-toml)
+  - [Why does `tomli-w-null` not write a multi-line string if the string value contains newlines?](#why-does-tomli-w-null-not-write-a-multi-line-string-if-the-string-value-contains-newlines)
+  - [Is `tomli-w-null` output guaranteed to be valid TOML?](#is-tomli-w-null-output-guaranteed-to-be-valid-toml)
+- [License](#license)
 
 <!-- mdformat-toc end -->
 
 ## Intro<a name="intro"></a>
 
-Tomli-W is a Python library for writing [TOML](https://toml.io).
-It is a write-only counterpart to [Tomli](https://github.com/hukkin/tomli),
+`tomli-w-null` is a Python library for writing [TOML](https://toml.io),
+based on [`tomli-w`](https://github/hukkin/tomli-w). All features of `tomli-w` are preserved.
+It is a write-only counterpart to [tomli-null](https://github.com/asrelo/tomli-null),
 which is a read-only TOML parser.
-Tomli-W is fully compatible with [TOML v1.0.0](https://toml.io/en/v1.0.0).
+
+`tomli-w-null` produces TOML code based on [TOML v1.0.0](https://toml.io/en/v1.0.0).
 
 ## Installation<a name="installation"></a>
 
 ```bash
-pip install tomli-w
+pip install tomli-w-null
 ```
 
 ## Usage<a name="usage"></a>
@@ -42,7 +44,7 @@ pip install tomli-w
 ### Write to string<a name="write-to-string"></a>
 
 ```python
-import tomli_w
+import tomli_w_null
 
 doc = {"table": {"nested": {}, "val3": 3}, "val2": 2, "val1": 1}
 expected_toml = """\
@@ -54,27 +56,27 @@ val3 = 3
 
 [table.nested]
 """
-assert tomli_w.dumps(doc) == expected_toml
+assert tomli_w_null.dumps(doc) == expected_toml
 ```
 
 ### Write to file<a name="write-to-file"></a>
 
 ```python
-import tomli_w
+import tomli_w_null
 
 doc = {"one": 1, "two": 2, "pi": 3}
 with open("path_to_file/conf.toml", "wb") as f:
-    tomli_w.dump(doc, f)
+    tomli_w_null.dump(doc, f)
 ```
 
 ## FAQ<a name="faq"></a>
 
-### Does Tomli-W sort the document?<a name="does-tomli-w-sort-the-document"></a>
+### Does `tomli-w-null` sort the document?<a name="does-tomli-w-null-sort-the-document"></a>
 
 No, but it respects sort order of the input data,
-so one could sort the content of the `dict` (recursively) before calling `tomli_w.dumps`.
+so one could sort the content of the `dict` (recursively) before calling `tomli_w_null.dumps`.
 
-### Does Tomli-W support writing documents with comments?<a name="does-tomli-w-support-writing-documents-with-comments"></a>
+### Does `tomli-w-null` support writing documents with comments?<a name="does-tomli-w-null-support-writing-documents-with-comments"></a>
 
 No.
 
@@ -84,7 +86,7 @@ Indent width of array content can be configured via the `indent` keyword argumen
 `indent` takes a non-negative integer, defaulting to 4.
 
 ```python
-import tomli_w
+import tomli_w_null
 
 doc = {"fruits": ["orange", "kiwi", "papaya"]}
 expected_toml = """\
@@ -94,10 +96,10 @@ fruits = [
  "papaya",
 ]
 """
-assert tomli_w.dumps(doc, indent=1) == expected_toml
+assert tomli_w_null.dumps(doc, indent=1) == expected_toml
 ```
 
-### Why does Tomli-W not write a multi-line string if the string value contains newlines?<a name="why-does-tomli-w-not-write-a-multi-line-string-if-the-string-value-contains-newlines"></a>
+### Why does `tomli-w-null` not write a multi-line string if the string value contains newlines?<a name="why-does-tomli-w-null-not-write-a-multi-line-string-if-the-string-value-contains-newlines"></a>
 
 This default was chosen to achieve lossless parse/write round-trips.
 
@@ -120,7 +122,7 @@ This is why Tomli-W avoids writing multi-line strings.
 A keyword argument is provided for users who do not need newline bytes to be preserved:
 
 ```python
-import tomli_w
+import tomli_w_null
 
 doc = {"s": "here's a newline\r\n"}
 expected_toml = '''\
@@ -128,10 +130,10 @@ s = """
 here's a newline
 """
 '''
-assert tomli_w.dumps(doc, multiline_strings=True) == expected_toml
+assert tomli_w_null.dumps(doc, multiline_strings=True) == expected_toml
 ```
 
-### Is Tomli-W output guaranteed to be valid TOML?<a name="is-tomli-w-output-guaranteed-to-be-valid-toml"></a>
+### Is `tomli-w-null` output guaranteed to be valid TOML?<a name="is-tomli-w-null-output-guaranteed-to-be-valid-toml"></a>
 
 No.
 If there's a chance that your input data is bad and you need output validation,
@@ -143,5 +145,10 @@ Examples of bad input data that can lead to writing invalid TOML without an erro
 - A mapping where keys behave very much like strings, but aren't. E.g. a tuple of strings of length 1.
 - A mapping where a value is a subclass of a supported type, but which overrides the `__str__` method.
 
-Given proper input (a mapping consisting of non-subclassed [types returned by Tomli](https://github.com/hukkin/tomli?tab=readme-ov-file#how-do-toml-types-map-into-python-types))
+Given proper input (a mapping consisting of non-subclassed
+[types returned by Tomli](https://github.com/asrelo/tomli-null?tab=readme-ov-file#conversion-table)),
 the output should be valid TOML.
+
+## License<a name="license"></a>
+
+`tomli-w-null` is distributed under the terms of the MIT license, see `LICENSE`.

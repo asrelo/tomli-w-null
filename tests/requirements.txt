@@ -1,4 +1,4 @@
 pytest
 pytest-randomly
 pytest-cov >=2.12.1
-tomli
+tomli_null @ git+https://github.com/asrelo/tomli-null@v_null_1.0.0

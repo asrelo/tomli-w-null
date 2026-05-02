@@ -1,12 +1,15 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2021 Taneli Hukkinen
+
 from decimal import Decimal
 from math import isnan
 from pathlib import Path
 from typing import Union
 
 import pytest
-import tomli
+import tomli_null
 
-import tomli_w
+import tomli_w_null
 
 COMPLIANCE_DIR = Path(__file__).parent / "data" / "toml-lang-compliance" / "valid"
 EXTRAS_DIR = Path(__file__).parent / "data" / "extras" / "valid"
@@ -25,9 +28,9 @@ def test_valid(valid):
     if valid.stem in {"qa-array-inline-nested-1000", "qa-table-inline-nested-1000"}:
         pytest.xfail("This much recursion is not supported")
     original_str = valid.read_bytes().decode()
-    original_data = tomli.loads(original_str)
-    dump_str = tomli_w.dumps(original_data)
-    after_dump_data = tomli.loads(dump_str)
+    original_data = tomli_null.loads(original_str)
+    dump_str = tomli_w_null.dumps(original_data)
+    after_dump_data = tomli_null.loads(dump_str)
     assert replace_nans(after_dump_data) == replace_nans(original_data)
 
 
@@ -53,4 +56,4 @@ def replace_nans(cont: Union[dict, list]) -> Union[dict, list]:
     ],
 )
 def test_obj_to_str_mapping(obj, expected_str, multiline_strings):
-    assert tomli_w.dumps(obj, multiline_strings=multiline_strings) == expected_str
+    assert tomli_w_null.dumps(obj, multiline_strings=multiline_strings) == expected_str

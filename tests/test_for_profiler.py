@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2021 Taneli Hukkinen
+
 """Test for profiling.
 
 This test can be useful for profiling, as most of the execution time
@@ -10,13 +13,13 @@ environment. To get and read profiler results:
 import os
 from pathlib import Path
 
-import tomli
+import tomli_null
 
-import tomli_w
+import tomli_w_null
 
 path = Path(__file__).parent.parent / "benchmark" / "data.toml"
 benchmark_toml = path.read_bytes().decode()
-data = tomli.loads(benchmark_toml)
+data = tomli_null.loads(benchmark_toml)
 
 
 def test_for_profiler():
@@ -26,4 +29,4 @@ def test_for_profiler():
     # standard test suite.
     iterations = int(os.environ.get("PROFILER_ITERATIONS", 1))
     for _ in range(iterations):
-        tomli_w.dumps(data)
+        tomli_w_null.dumps(data)

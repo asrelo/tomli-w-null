@@ -1,14 +1,19 @@
-import tomli
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2021 Taneli Hukkinen
 
-import tomli_w
+import tomli_null
+
+import tomli_w_null
 
 
 def test_newline_before_table():
-    actual = tomli_w.dumps({"table": {}})
+    actual = tomli_w_null.dumps({"table": {}})
     expected = "[table]\n"
     assert actual == expected
 
-    actual = tomli_w.dumps({"table": {"nested": {}, "val3": 3}, "val2": 2, "val1": 1})
+    actual = tomli_w_null.dumps(
+        {"table": {"nested": {}, "val3": 3}, "val2": 2, "val1": 1}
+    )
     expected = """\
 val2 = 2
 val1 = 1
@@ -22,11 +27,11 @@ val3 = 3
 
 
 def test_empty_doc():
-    assert tomli_w.dumps({}) == ""
+    assert tomli_w_null.dumps({}) == ""
 
 
 def test_dont_write_redundant_tables():
-    actual = tomli_w.dumps({"tab1": {"tab2": {"tab3": {}}}})
+    actual = tomli_w_null.dumps({"tab1": {"tab2": {"tab3": {}}}})
     expected = "[tab1.tab2.tab3]\n"
     assert actual == expected
 
@@ -36,7 +41,7 @@ def test_multiline():
         "This is longer than threshold!\n"
         "Should be formatted as a multiline basic string"
     )
-    actual = tomli_w.dumps({"ml_string": multiline_string}, multiline_strings=True)
+    actual = tomli_w_null.dumps({"ml_string": multiline_string}, multiline_strings=True)
     expected = '''\
 ml_string = """
 This is longer than threshold!
@@ -46,7 +51,7 @@ Should be formatted as a multiline basic string"""
 
 
 def test_only_tables():
-    actual = tomli_w.dumps({"tab1": {}, "tab2": {}})
+    actual = tomli_w_null.dumps({"tab1": {}, "tab2": {}})
     expected = """\
 [tab1]
 
@@ -56,7 +61,9 @@ def test_only_tables():
 
 
 def test_tricky_keys():
-    actual = tomli_w.dumps({"f": 1, "tab1": {}, "": {"f": 2, "": {"": 1}}, "tab3": {}})
+    actual = tomli_w_null.dumps(
+        {"f": 1, "tab1": {}, "": {"f": 2, "": {"": 1}}, "tab3": {}}
+    )
     expected = """\
 f = 1
 
@@ -74,7 +81,7 @@ f = 2
 
 
 def test_nested_keys():
-    actual = tomli_w.dumps(
+    actual = tomli_w_null.dumps(
         {
             "k": 1,
             "a": {"b": {"c": {"d": {"e": {"f": {}}, "e2": {"f2": {}}}, "d_key1": 1}}},
@@ -104,9 +111,9 @@ a = [
     3,
 ]
 """
-    actual = tomli_w.dumps(example)
+    actual = tomli_w_null.dumps(example)
     assert actual == expected
-    assert tomli.loads(actual) == example
+    assert tomli_null.loads(actual) == example
 
     example = {"a": {"nested": example}}
     expected = """\
@@ -118,7 +125,7 @@ a = [
     3,
 ]
 """
-    actual = tomli_w.dumps(example)
+    actual = tomli_w_null.dumps(example)
     assert actual == expected
 
 
@@ -138,9 +145,9 @@ long-value = "Lorem ipsum sith"
 another-long-value = "consectetur adipis"
 simple-value = 3
 """
-    actual = tomli_w.dumps(example)
+    actual = tomli_w_null.dumps(example)
     assert actual == expected
-    assert tomli.loads(actual) == example
+    assert tomli_null.loads(actual) == example
 
 
 def test_array_of_short_tables():
@@ -154,7 +161,7 @@ nested-array = [
     {{ c = 2 }},
 ]
 """
-    actual = tomli_w.dumps(example)
+    actual = tomli_w_null.dumps(example)
     assert actual == expected
 
 
@@ -185,9 +192,9 @@ another_array = [
 [[table.nested_table]]
 c = 3
 """
-    actual = tomli_w.dumps(example)
+    actual = tomli_w_null.dumps(example)
     assert actual == expected
-    assert tomli.loads(actual) == example
+    assert tomli_null.loads(actual) == example
 
 
 def test_table_with_empty_array():
@@ -197,9 +204,9 @@ def test_table_with_empty_array():
 [table]
 array = []
 """
-    actual = tomli_w.dumps(example)
+    actual = tomli_w_null.dumps(example)
     assert actual == expected
-    assert tomli.loads(actual) == example
+    assert tomli_null.loads(actual) == example
 
 
 def test_non_trivial_nesting():
@@ -248,37 +255,29 @@ another-long-value = "consectetur adipiscing elit"
 a-third-one = "sed do eiusmod tempor incididunt ut labore et dolore magna"
 simple-value = 3
 """
-    actual = tomli_w.dumps(example)
+    actual = tomli_w_null.dumps(example)
     assert actual == expected
-    assert tomli.loads(actual) == example
+    assert tomli_null.loads(actual) == example
 
 
 def test_multiline_in_aot():
     data = {"aot": [{"multiline_string": "line1\nline2"}]}
-    assert (
-        tomli_w.dumps(data, multiline_strings=True)
-        == '''\
+    assert tomli_w_null.dumps(data, multiline_strings=True) == '''\
 [[aot]]
 multiline_string = """
 line1
 line2"""
 '''
-    )
-    assert (
-        tomli_w.dumps(data, multiline_strings=False)
-        == """\
+    assert tomli_w_null.dumps(data, multiline_strings=False) == """\
 aot = [
     { multiline_string = "line1\\nline2" },
 ]
 """
-    )
 
 
 def test_array_indent_override():
     data = {"k0": ["v1", "v2", ["v3", "v4"]]}
-    assert (
-        tomli_w.dumps(data, indent=2)
-        == """\
+    assert tomli_w_null.dumps(data, indent=2) == """\
 k0 = [
   "v1",
   "v2",
@@ -288,10 +287,7 @@ k0 = [
   ],
 ]
 """
-    )
-    assert (
-        tomli_w.dumps(data, indent=0)
-        == """\
+    assert tomli_w_null.dumps(data, indent=0) == """\
 k0 = [
 "v1",
 "v2",
@@ -301,4 +297,3 @@ k0 = [
 ],
 ]
 """
-    )

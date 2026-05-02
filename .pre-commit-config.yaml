@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/executablebooks/mdformat
-  rev: 00812cd1850e41aae5c0916645b4b7404f538e8c  # frozen: 0.7.19
+  rev: 2d496dbc18e31b83a1596685347ffe0b6041daf0  # frozen: 1.0.0
   hooks:
   - id: mdformat
     additional_dependencies:
@@ -16,15 +16,15 @@ repos:
     - flake8-builtins
     - flake8-comprehensions
 - repo: https://github.com/PyCQA/isort
-  rev: c235f5e450b4b84e58d114ed4c589cbf454175a3  # frozen: 5.13.2
+  rev: a333737ed43df02b18e6c95477ea1b285b3de15a  # frozen: 8.0.1
   hooks:
   - id: isort
-- repo: https://github.com/psf/black
-  rev: 1b2427a2b785cc4aac97c19bb4b9a0de063f9547  # frozen: 24.10.0
+- repo: https://github.com/psf/black-pre-commit-mirror
+  rev: fa505ab9c3e0fedafe1709fd7ac2b5f8996c670d  # frozen: 26.3.1
   hooks:
   - id: black
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+  rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
   hooks:
   - id: check-yaml
 - repo: https://github.com/pre-commit/pygrep-hooks
@@ -34,7 +34,7 @@ repos:
   - id: python-check-blanket-noqa
   - id: python-check-blanket-type-ignore
 - repo: https://github.com/PyCQA/flake8
-  rev: e43806be3607110919eff72939fda031776e885a  # frozen: 7.1.1
+  rev: d93590f5be797aabb60e3b09f2f52dddb02f349f  # frozen: 7.3.0
   hooks:
   - id: flake8
     additional_dependencies:
@@ -42,10 +42,11 @@ repos:
     - flake8-builtins
     - flake8-comprehensions
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: f56614daa94d5cd733d3b7004c5df9caad267b4a  # frozen: v1.13.0
+  rev: a66e98df7b4aeeb3724184b332785976d062b92e  # frozen: v1.19.1
   hooks:
   - id: mypy
+    pass_filenames: false
     args: ["--scripts-are-modules"]
     additional_dependencies:
     - pytest
-    - tomli
+    - "tomli_null @ git+https://github.com/asrelo/tomli-null@v_null_1.0.0"
