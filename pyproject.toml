@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "tomli_w_null"
-version = "1.0.0"  # DO NOT EDIT THIS LINE MANUALLY. LET bump2version UTILITY DO IT
+version = "1.0.1"  # DO NOT EDIT THIS LINE MANUALLY. LET bump2version UTILITY DO IT
 description = "A lil' TOML writer with support for null values (fork of tomli-w)"
 authors = [
     { name = "Vyacheslav Syropyatov", email = "nonexistent@example.com" },
