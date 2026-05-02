@@ -1,9 +1,15 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2021 Taneli Hukkinen
+# SPDX-FileCopyrightText: 2026 Vyacheslav Syropyatov
 
+from types import SimpleNamespace
+from typing import cast
+
+import pytest
 import tomli_null
 
 import tomli_w_null
+import tomli_w_null._writer
 
 
 def test_newline_before_table():
@@ -297,3 +303,20 @@ k0 = [
 ],
 ]
 """
+
+
+@pytest.mark.parametrize(
+    ("supports_escape_1_byte", "code", "expected"),
+    [
+        (True, 0xCF, r"\xCF"),
+        (False, 0xFF, r"\u00FF"),
+        (False, 0x1F602, r"\U0001F602"),
+    ],
+)
+def test_escape_code_as_hex_uppercase(supports_escape_1_byte, code, expected):
+    mock_ctx = SimpleNamespace(supports_escape_1_byte=supports_escape_1_byte)
+    result = tomli_w_null._writer._escape_code_as_hex(
+        code,
+        cast(tomli_w_null._writer.Context, mock_ctx),
+    )
+    assert result == expected

@@ -7,8 +7,11 @@ from datetime import date, datetime, time
 from types import MappingProxyType
 from typing import IO, TYPE_CHECKING, Any, Final, Union
 
+from tomli_w_null._version import TOML_VERSION_DEFAULT, TOMLVersion
+
 if TYPE_CHECKING:
     from decimal import Decimal
+
 
 ASCII_CTRL = frozenset(chr(i) for i in range(32)) | frozenset(chr(127))
 ILLEGAL_BASIC_STR_CHARS = frozenset('"\\') | ASCII_CTRL - frozenset("\t")
@@ -18,7 +21,7 @@ BARE_KEY_CHARS = frozenset(
 ARRAY_TYPES = (list, tuple)
 MAX_LINE_LENGTH = 100
 
-COMPACT_ESCAPES = MappingProxyType(
+BASIC_ESCAPES = MappingProxyType(
     {
         "\u0008": "\\b",  # backspace
         "\u000a": "\\n",  # linefeed
@@ -30,14 +33,35 @@ COMPACT_ESCAPES = MappingProxyType(
 )
 
 
+MULTILINE_STRINGS_DEFAULT = False
+INDENT_DEFAULT = 4
+
+
 class Context:
-    def __init__(self, allow_multiline: bool, indent: int):
+    def __init__(
+        self,
+        toml_version: Union[TOMLVersion, str] = TOML_VERSION_DEFAULT,
+        *,
+        allow_multiline: bool = MULTILINE_STRINGS_DEFAULT,
+        indent: int = INDENT_DEFAULT,
+    ):
         if indent < 0:
             raise ValueError("Indent width must be non-negative")
+        if isinstance(toml_version, str):
+            toml_version = TOMLVersion.from_string(toml_version)
+        self.toml_version: Final = toml_version
         self.allow_multiline: Final = allow_multiline
         # cache rendered inline tables (mapping from object id to rendered inline table)
         self.inline_table_cache: Final[dict[int, str]] = {}
         self.indent_str: Final = " " * indent
+
+    @property
+    def supports_escape_esc(self) -> bool:
+        return self.toml_version >= TOMLVersion(1, 1, 0)
+
+    @property
+    def supports_escape_1_byte(self) -> bool:
+        return self.toml_version >= TOMLVersion(1, 1, 0)
 
 
 def dump(
@@ -45,18 +69,24 @@ def dump(
     fp: IO[bytes],
     /,
     *,
-    multiline_strings: bool = False,
-    indent: int = 4,
+    toml_version: Union[TOMLVersion, str] = TOML_VERSION_DEFAULT,
+    multiline_strings: bool = MULTILINE_STRINGS_DEFAULT,
+    indent: int = INDENT_DEFAULT,
 ) -> None:
-    ctx = Context(multiline_strings, indent)
+    ctx = Context(toml_version, allow_multiline=multiline_strings, indent=indent)
     for chunk in gen_table_chunks(obj, ctx, name=""):
         fp.write(chunk.encode())
 
 
 def dumps(
-    obj: Mapping[str, Any], /, *, multiline_strings: bool = False, indent: int = 4
+    obj: Mapping[str, Any],
+    /,
+    *,
+    toml_version: Union[TOMLVersion, str] = TOML_VERSION_DEFAULT,
+    multiline_strings: bool = MULTILINE_STRINGS_DEFAULT,
+    indent: int = INDENT_DEFAULT,
 ) -> str:
-    ctx = Context(multiline_strings, indent)
+    ctx = Context(toml_version, allow_multiline=multiline_strings, indent=indent)
     return "".join(gen_table_chunks(obj, ctx, name=""))
 
 
@@ -85,14 +115,14 @@ def gen_table_chunks(
     if literals:
         yielded = True
         for k, v in literals:
-            yield f"{format_key_part(k)} = {format_literal(v, ctx)}\n"
+            yield f"{format_key_part(k, ctx)} = {format_literal(v, ctx)}\n"
 
     for k, v, in_aot in tables:
         if yielded:
             yield "\n"
         else:
             yielded = True
-        key_part = format_key_part(k)
+        key_part = format_key_part(k, ctx)
         display_name = f"{name}.{key_part}" if name else key_part
         yield from gen_table_chunks(v, ctx, name=display_name, inside_aot=in_aot)
 
@@ -107,7 +137,7 @@ def format_literal(obj: object, ctx: Context, *, nest_level: int = 0) -> str:
             raise ValueError("TOML does not support offset times")
         return str(obj)
     if isinstance(obj, str):
-        return format_string(obj, allow_multiline=ctx.allow_multiline)
+        return format_string(obj, ctx, allow_multiline=ctx.allow_multiline)
     if isinstance(obj, ARRAY_TYPES):
         return format_inline_array(obj, ctx, nest_level)
     if isinstance(obj, Mapping):
@@ -144,7 +174,7 @@ def format_inline_table(obj: Mapping, ctx: Context) -> str:
         rendered = (
             "{ "
             + ", ".join(
-                f"{format_key_part(k)} = {format_literal(v, ctx)}"
+                f"{format_key_part(k, ctx)} = {format_literal(v, ctx)}"
                 for k, v in obj.items()
             )
             + " }"
@@ -168,7 +198,7 @@ def format_inline_array(obj: Union[tuple, list], ctx: Context, nest_level: int) 
     )
 
 
-def format_key_part(part: str) -> str:
+def format_key_part(part: str, ctx: Context) -> str:
     try:
         only_bare_key_chars = BARE_KEY_CHARS.issuperset(part)
     except TypeError:
@@ -179,10 +209,10 @@ def format_key_part(part: str) -> str:
 
     if part and only_bare_key_chars:
         return part
-    return format_string(part, allow_multiline=False)
+    return format_string(part, ctx, allow_multiline=False)
 
 
-def format_string(s: str, *, allow_multiline: bool) -> str:
+def format_string(s: str, ctx: Context, *, allow_multiline: bool) -> str:
     do_multiline = allow_multiline and "\n" in s
     if do_multiline:
         result = '"""\n'
@@ -201,19 +231,29 @@ def format_string(s: str, *, allow_multiline: bool) -> str:
             return result + '"'
         if char in ILLEGAL_BASIC_STR_CHARS:
             result += s[seq_start:pos]
-            if char in COMPACT_ESCAPES:
-                if do_multiline and char == "\n":
-                    result += "\n"
-                else:
-                    result += COMPACT_ESCAPES[char]
-            else:
-                char_ord_hex = hex(ord(char))[2:]
-                if len(char_ord_hex) > 4:
-                    result += "\\U" + char_ord_hex.rjust(8, "0")
-                else:
-                    result += "\\u" + char_ord_hex.rjust(4, "0")
+            result += escape_basic_char(char, ctx, multiline=do_multiline)
             seq_start = pos + 1
         pos += 1
+
+
+def escape_basic_char(char: str, ctx: Context, *, multiline: bool) -> str:
+    if multiline and char == "\n":
+        return "\n"
+    if char in BASIC_ESCAPES:
+        return BASIC_ESCAPES[char]
+    code = ord(char)
+    if code == 0x1B and ctx.supports_escape_esc:
+        return "\\e"
+    return _escape_code_as_hex(code, ctx)
+
+
+def _escape_code_as_hex(code: int, ctx: Context) -> str:
+    code_hex = hex(code)[2:].upper()
+    if code <= 0xFF and ctx.supports_escape_1_byte:
+        return "\\x" + code_hex.rjust(2, "0")
+    if code <= 0xFFFF:
+        return "\\u" + code_hex.rjust(4, "0")
+    return "\\U" + code_hex.rjust(8, "0")
 
 
 def is_aot(obj: Any) -> bool:

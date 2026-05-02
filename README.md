@@ -14,6 +14,7 @@
 - [Usage](#usage)
   - [Write to string](#write-to-string)
   - [Write to file](#write-to-file)
+  - [Specify TOML version](#specify-toml-version)
 - [FAQ](#faq)
   - [Does `tomli-w-null` sort the document?](#does-tomli-w-null-sort-the-document)
   - [Does `tomli-w-null` support writing documents with comments?](#does-tomli-w-null-support-writing-documents-with-comments)
@@ -31,7 +32,10 @@ based on [`tomli-w`](https://github/hukkin/tomli-w). All features of `tomli-w` a
 It is a write-only counterpart to [tomli-null](https://github.com/asrelo/tomli-null),
 which is a read-only TOML parser.
 
-`tomli-w-null` produces TOML code based on [TOML v1.0.0](https://toml.io/en/v1.0.0).
+`tomli-w-null` can produce TOML code based on TOML [v1.0.0](https://toml.io/en/v1.0.0) (default)
+or [v1.1.0](https://toml.io/en/v1.1.0). Since TOML 1.1.0 is fully backwards compatible
+with TOML 1.0.0 and doesn't introduce any new features in supported data structures,
+TOML 1.0.0 remains the default.
 
 ## Installation<a name="installation"></a>
 
@@ -67,6 +71,20 @@ import tomli_w_null
 doc = {"one": 1, "two": 2, "pi": 3}
 with open("path_to_file/conf.toml", "wb") as f:
     tomli_w_null.dump(doc, f)
+```
+
+### Specify TOML version<a name="specify-toml-version"></a>
+
+```python
+import tomli_w_null
+
+doc = {"key": "value", "from_tty": "data\x04", "binary": "\x1a\x1b\x1c\x1d"}
+expected_toml = """\
+key = value
+from_tty = "data\x04"
+binary = "\x1a\e\x1c\x1d"
+"""
+assert tomli_w_null.dumps(doc, toml_version="1.1.0") == expected_toml
 ```
 
 ## FAQ<a name="faq"></a>
